@@ -1,6 +1,7 @@
 ------------- MODULE Paxos --------------------
 (*\* Paxos algorithm *)
 (*\* Copr. (c) Murat Demirbas, Nov 10, 2016 *)
+(* source link: https://github.com/muratdem/PlusCal-examples/blob/master/Paxos/pax2.tla *)
 EXTENDS Integers, Sequences, FiniteSets
 CONSTANT M, N, STOP, MAXB
 ASSUME M \in Nat /\ N \in Nat /\ M<=N
