@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Среда для верификации графа состояний — TLA+/Pluscal</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:           #000000;
+  --bg-soft:      #0E0E12;
+  --text:         #FFFFFF;
+  --muted:        rgba(255,255,255,0.55);
+  --line:         rgba(255,255,255,0.10);
+
+  --accent-coral:  #FF6633;
+  --accent-purple: #6A5BFF;
+  --accent-teal:   #16C7BC;
+  --accent-blue:   #2C7AFF;
+  --accent-yellow: #FFD600;
+  --accent-red:    #E5403B;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --slide-pad-x: 80px;
+  --slide-pad-top: 80px;
+  --slide-pad-bottom: 60px;
+}
+
+html, body { background: var(--bg); }
+
+.reveal {
+  font-family: var(--font-sans);
+  font-size: 26px;
+  color: var(--text);
+  background: var(--bg);
+}
+.reveal .slides { background: transparent; text-align: left; }
+
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  margin: 0 0 0.35em 0;
+  color: var(--text);
+}
+.reveal h1 { font-size: 2.8em; line-height: 1.0; }
+.reveal h2 { font-size: 1.7em; line-height: 1.1; }
+.reveal h3 { font-size: 1em; line-height: 1.3; font-weight: 700; }
+.reveal p  { line-height: 1.45; }
+.reveal ul, .reveal ol { margin: 0.35em 0 0.35em 1.2em; line-height: 1.5; }
+.reveal li { margin: 0.15em 0; }
+
+.reveal a { color: var(--accent-coral); text-decoration: none; }
+.reveal a:hover { text-decoration: underline; }
+.reveal strong { font-weight: 700; }
+.reveal code { font-family: var(--font-mono); font-size: 0.85em; color: var(--accent-coral); }
+
+/* Header */
+.hd {
+  position: absolute !important;
+  top: 24px !important;
+  left: var(--slide-pad-x);
+  right: var(--slide-pad-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.55em;
+  letter-spacing: 0.02em;
+  z-index: 2;
+  color: var(--muted);
+}
+.hd .brand { display: flex; align-items: center; gap: 0.5em; color: var(--text); }
+.hd .brand-logo { height: 1.8em; width: auto; display: block; }
+.hd .brand-text { font-weight: 700; }
+.hd .brand-text .dot { color: var(--accent-coral); }
+
+/* Cover */
+.reveal .slides > section.present.cover {
+  flex-direction: column;
+  justify-content: center;
+}
+.cover h1 { font-size: 3.2em; line-height: 1.05; }
+.cover .subtitle {
+  font-size: 1.15em;
+  font-weight: 400;
+  color: var(--muted);
+  max-width: 85%;
+  margin: 0.6em 0 1.6em;
+}
+.cover .author { font-size: 0.65em; color: var(--muted); }
+.cover .author strong { color: var(--text); }
+
+/* Divider */
+.reveal .slides > section.present.divider {
+  flex-direction: column;
+  justify-content: center;
+}
+.divider .kicker {
+  color: var(--accent-coral);
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.6em;
+}
+.divider h2 { font-size: 3em; line-height: 1.05; max-width: 90%; }
+
+/* Slide base */
+.reveal .slides section {
+  box-sizing: border-box;
+  min-height: 720px;
+  padding: var(--slide-pad-top) var(--slide-pad-x) var(--slide-pad-bottom);
+  background: var(--bg);
+  color: var(--text);
+  padding-top: 140px;
+}
+
+.slide-title { margin-top: 0; }
+.slide-title.subtitle { margin-top: -0.2em; margin-bottom: 0.9em; }
+.slide-title .subtitle {
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--muted);
+  margin: -0.2em 0 0.9em 0;
+}
+
+
+
+/* Points */
+.points {
+  display: grid;
+  gap: 1.2em 1.4em;
+  margin-top: 0.6em;
+}
+.points.cols-2 { grid-template-columns: 1fr 1fr; }
+.points.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.points.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.point .num {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.7em;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.15em;
+}
+.point.coral  .num { color: var(--accent-coral); }
+.point.purple .num { color: var(--accent-purple); }
+.point.teal   .num { color: var(--accent-teal); }
+.point.blue   .num { color: var(--accent-blue); }
+.point.yellow .num { color: var(--accent-yellow); }
+.point.red    .num { color: var(--accent-red); }
+
+.point h3 { margin: 0.15em 0 0.25em 0; font-size: 0.95em; }
+.point p  { font-size: 0.7em; line-height: 1.45; color: var(--muted); margin: 0; }
+
+/* TOC */
+.toc { margin-top: 1em; }
+.toc-row { display: flex; align-items: baseline; gap: 0.7em; margin: 0.5em 0; font-size: 1em; }
+.toc-row .toc-num {
+  font-weight: 800;
+  font-size: 1.1em;
+  letter-spacing: -0.02em;
+  min-width: 1.6em;
+}
+.toc-row:nth-child(4n+1) .toc-num { color: var(--accent-purple); }
+.toc-row:nth-child(4n+2) .toc-num { color: var(--accent-coral); }
+.toc-row:nth-child(4n+3) .toc-num { color: var(--accent-teal); }
+.toc-row:nth-child(4n)   .toc-num { color: var(--accent-blue); }
+.toc-row .toc-text { font-weight: 700; }
+.toc-row .toc-aside { font-size: 0.7em; color: var(--muted); font-weight: 400; }
+
+/* Pipeline */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4em;
+  margin: 0.8em 0;
+  font-size: 0.7em;
+}
+.pipeline-step {
+  flex: 1;
+  padding: 0.9em 0.6em;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  border: 2px solid;
+  background: rgba(255,255,255,0.03);
+}
+.pipeline-step.purple { border-color: var(--accent-purple); color: var(--accent-purple); }
+.pipeline-step.coral  { border-color: var(--accent-coral);  color: var(--accent-coral);  }
+.pipeline-step.teal   { border-color: var(--accent-teal);   color: var(--accent-teal);   }
+.pipeline-step.blue   { border-color: var(--accent-blue);   color: var(--accent-blue);   }
+.pipeline-step.yellow { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+.pipeline-step .step-icon { display: block; font-size: 1.4em; margin-bottom: 0.2em; }
+.pipeline-step .step-title { font-size: 0.92em; }
+.pipeline-arrow { display: flex; align-items: center; color: var(--muted); font-size: 1.4em; font-weight: 700; }
+
+/* Code blocks */
+.reveal pre {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1em;
+  font-size: 0.55em;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 420px;
+}
+.reveal pre code {
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: transparent;
+  padding: 0;
+}
+
+/* Highlight.js overrides for TLA+ */
+.hljs-keyword { color: var(--accent-purple); }
+.hljs-string { color: var(--accent-teal); }
+.hljs-number { color: var(--accent-coral); }
+.hljs-comment { color: var(--muted); font-style: italic; }
+.hljs-built_in { color: var(--accent-blue); }
+.hljs-variable { color: var(--accent-yellow); }
+.hljs-operator { color: var(--text); }
+
+/* Example box */
+.example-box {
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr;
+  gap: 1em;
+  align-items: stretch;
+  margin-top: 0.5em;
+}
+.example-input, .example-output {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1em 1.1em;
+  font-size: 0.62em;
+  line-height: 1.5;
+}
+.example-input  { border-left: 3px solid var(--accent-yellow); }
+.example-output { border-left: 3px solid var(--accent-coral); }
+.example-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6em;
+  color: var(--muted);
+}
+.example-label {
+  font-size: 0.65em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 0.5em 0;
+  color: var(--accent-coral);
+}
+.example-label.yellow { color: var(--accent-yellow); }
+
+/* Dialog / intrigue */
+.dialogue { margin-top: 0.8em; }
+.dialogue-line {
+  display: flex;
+  gap: 0.8em;
+  margin: 0.6em 0;
+  font-size: 0.85em;
+  align-items: flex-start;
+}
+.dialogue-speaker {
+  font-weight: 700;
+  min-width: 120px;
+  text-align: right;
+  color: var(--accent-coral);
+}
+.dialogue-speaker.teal { color: var(--accent-teal); }
+.dialogue-text { flex: 1; color: var(--text); }
+.dialogue-answer { margin-top: 0.4em; padding-left: 128px; font-size: 0.9em; color: var(--muted); font-style: italic; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5em; margin-top: 0.6em; }
+.stat-block .num {
+  font-weight: 800;
+  font-size: 3em;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.stat-block .num.coral  { color: var(--accent-coral); }
+.stat-block .num.purple { color: var(--accent-purple); }
+.stat-block .num.teal   { color: var(--accent-teal); }
+.stat-block .lbl { font-size: 0.65em; margin-top: 0.35em; color: var(--muted); line-height: 1.35; }
+
+/* Matrix */
+.matrix {
+  display: grid;
+  grid-template-columns: 160px repeat(4, 1fr);
+  gap: 8px;
+  font-size: 0.6em;
+  margin-top: 0.7em;
+}
+.matrix .row-label {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  text-align: right;
+  padding: 0.6em 0.8em;
+  color: var(--text);
+  border-right: 2px solid var(--line);
+}
+.matrix .cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0.7em 0.4em;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--muted);
+}
+.matrix .cell.have   { background: rgba(22,199,188,0.10);  border-color: var(--accent-teal);  color: var(--accent-teal); }
+.matrix .cell.want   { background: rgba(106,91,255,0.10); border-color: var(--accent-purple); color: var(--accent-purple); }
+.matrix .cell.miss   { background: rgba(255,255,255,0.02); border-color: var(--line); color: var(--muted); }
+.matrix .cell-mark   { font-size: 1.4em; font-weight: 800; line-height: 1; }
+.matrix .cell-name   { font-size: 0.85em; }
+.matrix-legend { display: flex; gap: 1.2em; font-size: 0.55em; color: var(--muted); margin-top: 0.6em; }
+.matrix-legend .li { display: inline-flex; align-items: center; gap: 0.4em; }
+.matrix-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+.matrix-legend .dot.have { background: var(--accent-teal); }
+.matrix-legend .dot.want { background: var(--accent-purple); }
+.matrix-legend .dot.miss { background: rgba(255,255,255,0.2); }
+
+/* Image placeholder */
+.img-placeholder {
+  background: var(--bg-soft);
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 2em;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.7em;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.img-placeholder .ph-icon { font-size: 2em; margin-bottom: 0.3em; }
+
+/* Timeline */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 1.4em;
+  margin-top: 0.8em;
+  position: relative;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--accent-purple) 0%,
+    var(--accent-teal) 50%,
+    var(--accent-coral) 100%);
+  opacity: 0.45;
+  z-index: 0;
+}
+.tl-step { position: relative; z-index: 1; }
+.tl-step .tl-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 3px solid var(--accent-coral);
+  display: block;
+  margin: 0 0 0.7em 0;
+}
+.tl-step.purple .tl-dot { border-color: var(--accent-purple); }
+.tl-step.teal   .tl-dot { border-color: var(--accent-teal); }
+.tl-step.coral  .tl-dot { border-color: var(--accent-coral); background: var(--accent-coral); }
+.tl-when {
+  font-size: 0.6em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 0.3em 0;
+  color: var(--accent-coral);
+}
+.tl-step.purple .tl-when { color: var(--accent-purple); }
+.tl-step.teal   .tl-when { color: var(--accent-teal); }
+.tl-step.coral  .tl-when { color: var(--accent-coral); }
+.tl-title {
+  font-size: 0.9em;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 0.45em 0;
+  color: var(--text);
+}
+.tl-step ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.62em;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.tl-step li {
+  margin: 0.3em 0;
+  padding-left: 0.9em;
+  position: relative;
+}
+.tl-step li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  top: -0.1em;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+.tl-step.purple li::before { color: var(--accent-purple); }
+.tl-step.teal   li::before { color: var(--accent-teal); }
+.tl-step.coral  li::before { color: var(--accent-coral); }
+
+/* Misc */
+.hl-coral  { color: var(--accent-coral); font-weight: 700; }
+.hl-purple { color: var(--accent-purple); font-weight: 700; }
+.hl-teal   { color: var(--accent-teal); font-weight: 700; }
+.hl-blue   { color: var(--accent-blue); font-weight: 700; }
+.muted     { color: var(--muted); }
+
+.foot {
+  position: absolute;
+  bottom: 24px;
+  right: var(--slide-pad-x);
+  font-size: 0.5em;
+  color: var(--muted);
+}
+
+.dense .points { gap: 0.8em 1em; }
+.dense .point p { font-size: 0.68em; }
+
+.reveal .slides section > * { position: relative; z-index: 1; }
+</style>
+</head>
+
+<body>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- 1: Cover -->
+    <section class="cover">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h1>Среда для верификации<br>графа состояний<br>многопоточных программ</h1>
+      <p class="subtitle">TLA+/Pluscal — от спецификации к математическому доказательству отсутствия ошибок</p>
+      <p class="author"><strong>Иванин Виталий</strong> · E4 · команда SLA · 2026</p>
+    </section>
+
+    <!-- 2: Speaker -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <div style="display: flex; gap: 3em; align-items: flex-start; margin-top: 0.5em;">
+        <div style="flex: 1;">
+          <h2 class="slide-title" style="margin-top: 0;">О докладчике</h2>
+          <div style="margin-top: 2em;">
+            <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em; color: var(--accent-purple);">Иванин Виталий</h3>
+            <p style="line-height: 1.5; margin: 0 0 0.8em 0;">Backend разработчик (E4) в команде SLA. Разрабатываю static-fallback, также частично помогаю с функционалом сценариев надежности и NFR.</p>
+            <p style="margin: 0; font-size: 0.75em; line-height: 1.5;">Веду SRE community <a href="https://mt.avito.ru/avito/channels/sre-coe">[~sre-coe]</a>: мы ищем спикеров, пишите в ММ <a href="mattermost://mt.avito.ru/avito/messages/@vaivanin" style="color: var(--accent-coral); text-decoration: none; font-weight: 700;">@vaivanin</a></p>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; justify-content: center;">
+          <img src="./images/speaker-photo.jpg" alt="Фото докладчика" style="max-height: 520px; height: auto; width: auto; max-width: 100%; border-radius: 12px; border: 2px solid var(--line); display: block;">
+        </div>
+      </div>
+    </section>
+
+    <!-- 3: Intrigue - Question -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 style="font-size: 2.8em; line-height: 1.1; text-align: center; max-width: 95%;">Можно ли гарантировать отсутствие<br><span class="hl-coral">deadlock'а</span> или <span class="hl-coral">datarace'а</span><br>в программе?</h2>
+      <p class="muted" style="font-size: 0.75em; margin-top: 2em; text-align: center;">
+        *программа должна быть непустая и делающая что-то полезное
+      </p>
+    </section>
+
+    <!-- 4: Intrigue - Answer -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 style="font-size: 2.8em; line-height: 1.1; text-align: center; max-width: 95%;">Можно ли гарантировать отсутствие<br><span class="hl-coral">deadlock'а</span> или <span class="hl-coral">datarace'а</span><br>в программе?</h2>
+      <p style="font-size: 2em; font-weight: 700; color: var(--accent-teal); text-align: center; margin-top: 0.8em;">Можно!</p>
+      <p class="muted" style="font-size: 0.85em; margin-top: 0.5em; text-align: center;">
+        Как — узнаете в конце доклада
+      </p>
+    </section>
+
+    <!-- 5: Meme -->
+    <section class="cover">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px">
+        <img src="./images/unreliable_agents.jpg" alt="Мем про ненадёжных агентов и race conditions" style="max-width:70%;max-height:500px;border-radius:12px;">
+      </div>
+    </section>
+
+    <!-- 6: Leslie Lamport -->
+    <section style="padding-top: 70px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Лэсли Лэмпорт — от LaTeX к <span class="hl-coral">Turing Award</span></h2>
+      <p class="slide-title subtitle">Человек, который дал нам инструменты для мышления о распределённых системах</p>
+
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: 2em; margin-top: 0.8em; align-items: start;">
+        <!-- Left: Photo -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <img src="./images/leslie_lamport.jpg" alt="Leslie Lamport" style="width: 100%; border-radius: 12px; border: 2px solid var(--line); display: block;">
+          <p style="font-size: 0.6em; color: var(--muted); margin-top: 0.5em; text-align: center; line-height: 1.4;">
+            <strong style="color: var(--text);">Leslie Lamport</strong><br>
+            born 1941, New York City
+          </p>
+        </div>
+
+        <!-- Right: Vertical Timeline -->
+        <div style="display: flex; flex-direction: column; gap: 0.2em; font-size: 0.88em; position: relative; padding-left: 24px;">
+          <!-- Vertical line -->
+          <div style="position: absolute; left: 13px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(180deg, var(--accent-purple) 0%, var(--accent-teal) 50%, var(--accent-coral) 100%); opacity: 0.5;"></div>
+
+          <!-- Item 1 -->
+          <div style="display: flex; gap: 1em; align-items: flex-start; padding: 0.5em 0; position: relative;">
+            <span style="position: absolute; left: -18px; top: 0.7em; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent-purple); z-index: 1;"></span>
+            <div style="min-width: 70px; font-weight: 800; color: var(--accent-purple); font-size: 1.15em; letter-spacing: -0.02em;">1984</div>
+            <div>
+              <div style="font-weight: 700; color: var(--text); margin-bottom: 0.15em; font-size: 1.05em;">LaTeX</div>
+              <p style="font-size: 0.78em; color: var(--muted); margin: 0; line-height: 1.45;">Создал систему вёрстки, которую использует вся наука. А также <code style="font-size: 0.9em;">\usepackage{lamport}</code> для доказательств.</p>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div style="display: flex; gap: 1em; align-items: flex-start; padding: 0.5em 0; position: relative;">
+            <span style="position: absolute; left: -18px; top: 0.7em; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent-teal); z-index: 1;"></span>
+            <div style="min-width: 70px; font-weight: 800; color: var(--accent-teal); font-size: 1.15em; letter-spacing: -0.02em;">1989</div>
+            <div>
+              <div style="font-weight: 700; color: var(--text); margin-bottom: 0.15em; font-size: 1.05em;">Paxos</div>
+              <p style="font-size: 0.78em; color: var(--muted); margin: 0; line-height: 1.45;">Алгоритм консенсуса — основа всех распределённых БД. "The Part-Time Parliament" — одна из самых цитируемых статей в CS.</p>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div style="display: flex; gap: 1em; align-items: flex-start; padding: 0.5em 0; position: relative;">
+            <span style="position: absolute; left: -18px; top: 0.7em; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent-coral); z-index: 1;"></span>
+            <div style="min-width: 70px; font-weight: 800; color: var(--accent-coral); font-size: 1.15em; letter-spacing: -0.02em;">1999 → 2013</div>
+            <div>
+              <div style="font-weight: 700; color: var(--text); margin-bottom: 0.15em; font-size: 1.05em;">TLA+ & Turing Award</div>
+              <p style="font-size: 0.78em; color: var(--muted); margin: 0; line-height: 1.45;">TLA+ — язык спецификации распределённых систем. PlusCal — псевдокод, компилируемый в TLA+. Turing Award 2013.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <blockquote style="margin: 1em 0 0 0; padding: 0.8em 1em; border-left: 3px solid var(--accent-coral); background: rgba(255,102,51,0.05); font-size: 0.72em; font-style: italic; color: var(--muted); line-height: 1.5;">
+        <strong style="color: var(--text); font-style: normal;">ACM Turing Award 2013:</strong> fundamental contributions to the theory and practice of distributed and concurrent systems, notably the invention of concepts such as causality and logical clocks, safety and liveness, <span class="hl-coral" style="text-decoration: underline;">replicated state machines</span>, and <span class="hl-coral" style="text-decoration: underline;">sequential consistency</span>.
+      </blockquote>
+    </section>
+
+    <!-- 7: Formal Verifiers -->
+    <section class="dense" style="padding-top: 100px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Формальные верификаторы — где находится <span class="hl-coral">TLA+</span></h2>
+      <p class="slide-title subtitle">Разные инструменты для разных задач: от математических доказательств до модельной проверки</p>
+      <div class="matrix" style="grid-template-columns: 140px repeat(4,1fr)">
+        <div></div>
+        <div class="row-label" style="border:none;text-align:center;font-size:0.85em">Coq / Isabelle</div>
+        <div class="row-label" style="border:none;text-align:center;font-size:0.85em">SPIN / Promela</div>
+        <div class="row-label" style="border:none;text-align:center;font-size:0.85em; color:var(--accent-coral)">TLA+ / PlusCal</div>
+        <div class="row-label" style="border:none;text-align:center;font-size:0.85em">SAT/SMT</div>
+
+        <div class="row-label">Тип верификации</div>
+        <div class="cell">Интерактивные доказательства</div>
+        <div class="cell">Model checking</div>
+        <div class="cell" style="background: rgba(255,102,51,0.15); border-color: var(--accent-coral);"><div class="cell-name">Model checking + доказательства</div></div>
+        <div class="cell">Автоматические (Z3)</div>
+
+        <div class="row-label">Сложность входа</div>
+        <div class="cell miss">Высокая<br><span class="muted">(нужна матлогика)</span></div>
+        <div class="cell">Средняя</div>
+        <div class="cell" style="background: rgba(255,102,51,0.15); border-color: var(--accent-coral);"><div class="cell-name">Низкая<br><span class="muted">(псевдокод)</span></div></div>
+        <div class="cell">Высокая</div>
+
+        <div class="row-label">Примеры применения</div>
+        <div class="cell">CompCert — верифицированный компилятор C<br><span class="muted">seL4 — микроядро ОС</span></div>
+        <div class="cell">Проверка сетевых протоколов<br><span class="muted">Встроенные системы</span></div>
+        <div class="cell" style="background: rgba(255,102,51,0.15); border-color: var(--accent-coral);"><div class="cell-name">Распределённые БД<br><span class="muted">Консенсус-алгоритмы</span></div></div>
+        <div class="cell">Проверка hardware<br><span class="muted">Bounded model checking</span></div>
+
+        <div class="row-label">Компании, которые используют</div>
+        <div class="cell">INRIA, DARPA</div>
+        <div class="cell">NASA, Intel</div>
+        <div class="cell" style="background: rgba(255,102,51,0.15); border-color: var(--accent-coral);"><div class="cell-name">Amazon, Microsoft, MongoDB</div></div>
+        <div class="cell">Microsoft, Cadence</div>
+      </div>
+      <p class="muted" style="font-size:0.72em;margin-top:0.8em">
+        <span class="hl-teal">AWS:</span> TLA+ использовали для верификации S3, DynamoDB, EBS — нашли критические баги до деплоя.
+        <span class="hl-purple">Azure:</span> Верифицировали консенсус-алгоритмы Cosmos DB.
+      </p>
+    </section>
+
+    <!-- 8: TLA+ Concepts -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Устройство TLA+/Pluscal — <span class="hl-coral">инварианты</span> и <span class="hl-coral">граф состояний</span></h2>
+      <p class="slide-title subtitle">Три кита модели: состояния, переходы и проверка инвариантов на всём графе</p>
+      <div class="points cols-3">
+        <div class="point purple">
+          <div class="num">01</div>
+          <h3>Состояния программы</h3>
+          <p>Значения всех переменных в конкретный момент. Например: <code>mutexA = FALSE, mutexB = TRUE, pc = "LockB"</code></p>
+        </div>
+        <div class="point coral">
+          <div class="num">02</div>
+          <h3>Переходы между состояниями</h3>
+          <p>Каждая строка кода — это действие (action), меняющее состояние. Граф состояний = все возможные пути выполнения.</p>
+        </div>
+        <div class="point teal">
+          <div class="num">03</div>
+          <h3>Инварианты</h3>
+          <p>Утверждения, которые должны быть истинны в <strong>любом</strong> состоянии. Например: "не более одного потока в критической секции".</p>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.72em;margin-top:1em">
+        <strong>Пример:</strong> Два мьютекса <code>A</code> и <code>B</code>, два потока. Thread1 берёт A→B, Thread2 берёт B→A. Классический deadlock философов — но с двумя мьютексами.
+      </p>
+    </section>
+
+    <!-- 9: Roman Lipovsky Lecture -->
+    <section style="padding-top: 70px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Алгоритм работы чекера TLA+</h2>
+      <div style="display: flex; justify-content: center; margin-top: 0.5em;">
+        <img src="./images/lipovsky.png" alt="Роман Липовский — лекция по TLA+" style="max-width: 80%; max-height: 450px; border-radius: 12px; border: 2px solid var(--line);">
+      </div>
+      <p style="text-align: center; margin-top: 0.8em; font-size: 0.75em; line-height: 1.5;">
+        <a href="https://youtu.be/WwZ2ulDpPzg?t=1729" target="_blank" style="color: var(--accent-coral);">Подробное описание алгоритма работы чекера TLA+</a><br>
+        <a href="https://youtu.be/WwZ2ulDpPzg?t=1729" target="_blank" style="color: var(--accent-coral);">от Романа Липовского (в рамках курса TFTDS, Лекториум ФПМИ, 2021 год).</a>
+      </p>
+    </section>
+
+    <!-- 10: Screenshots -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Как выглядит работа с <span class="hl-coral">TLA+ Toolbox</span></h2>
+      <div class="points cols-2">
+        <div>
+          <img src="./images/tla-pluscal-code.png" alt="Пример кода на PlusCal" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block;">
+          <p style="font-size:0.65em;margin-top:0.5em;color:var(--muted)">Пример кода на Pluscal в TLA+ Toolbox</p>
+        </div>
+        <div>
+          <img src="./images/tla-model-check.png" alt="Результат Model Check" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block;">
+          <p style="font-size:0.65em;margin-top:0.5em;color:var(--muted)">Model checker перебрал состояния (построил граф), нашел 13 уникальных состояний и нашел пример Deadlock'a (справа на скриншоте)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11: Deadlock in graph -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Как выглядит <span class="hl-coral">deadlock</span> в графе состояний</h2>
+      <div class="points cols-2">
+        <div>
+          <img src="./images/deadlock-graph.png" alt="Граф состояний с deadlock" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block;">
+        </div>
+        <div class="point red" style="margin-top:0">
+          <div class="num">⚠️</div>
+          <h3>Что видит Model Checker</h3>
+          <p style="font-size:0.75em">
+            <strong>Error:</strong> Deadlock reached.<br><br>
+            State (num = 3): <code>mutexA = TRUE, mutexB = TRUE</code><br>
+            Thread1: ждёт mutexB<br>
+            Thread2: ждёт mutexA<br><br>
+            <strong>Ни один процесс не может продвинуться.</strong><br><br>
+            TLC нашёл это за <span class="hl-coral">0.03 секунды</span>, перебрав <span class="hl-coral">13 состояний</span>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12: Live Demo - Deadlock code -->
+    <section style="padding-top: 100px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Live Demo — код <span class="hl-red">с deadlock</span></h2>
+      <p class="slide-title subtitle">Thread1: A→B, Thread2: B→A. Классическое зацикливание.</p>
+      <div class="points cols-2">
+        <div>
+          <p style="font-size:0.6em;color:var(--muted);margin-bottom:0.3em"><strong>Thread1</strong> — берёт A, потом B</p>
+          <pre style="margin-top:0"><code class="language-tla">variables
+  mutexA = FALSE;
+  mutexB = FALSE;
+
+process Thread1 = 1
+begin
+  LockA:
+    await ~mutexA;
+    mutexA := TRUE;
+  LockB:
+    await ~mutexB;
+    mutexB := TRUE;
+  Critical:
+    mutexA := FALSE;
+    mutexB := FALSE;
+end process;</code></pre>
+        </div>
+        <div>
+          <p style="font-size:0.6em;color:var(--muted);margin-bottom:0.3em"><strong>Thread2</strong> — берёт B, потом A</p>
+          <pre style="margin-top:0"><code class="language-tla">process Thread2 = 2
+begin
+  LockB2:
+    await ~mutexB;
+    mutexB := TRUE;
+  LockA2:
+    await ~mutexA;
+    mutexA := TRUE;
+  Critical2:
+    mutexB := FALSE;
+    mutexA := FALSE;
+end process;</code></pre>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.65em;margin-top:0.5em">
+        <span class="hl-red">Результат:</span> TLC находит deadlock — оба потока заблокированы, каждый ждёт мьютекс, который держит другой.
+      </p>
+    </section>
+
+    <!-- 13: Live Demo - NoDeadlock code -->
+    <section style="padding-top: 100px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Live Demo — код <span class="hl-teal">без deadlock</span></h2>
+      <p class="slide-title subtitle">Оба потока берут мьютексы в одинаковом порядке: A→B. Иерархия ресурсов.</p>
+      <div class="points cols-2">
+        <div>
+          <p style="font-size:0.6em;color:var(--muted);margin-bottom:0.3em"><strong>Thread1</strong> — берёт A, потом B</p>
+          <pre style="margin-top:0"><code class="language-tla">variables
+  mutexA = FALSE;
+  mutexB = FALSE;
+
+process Thread1 = 1
+begin
+  LockA:
+    await ~mutexA;
+    mutexA := TRUE;
+  LockB:
+    await ~mutexB;
+    mutexB := TRUE;
+  Critical:
+    mutexA := FALSE;
+    mutexB := FALSE;
+end process;</code></pre>
+        </div>
+        <div>
+          <p style="font-size:0.6em;color:var(--muted);margin-bottom:0.3em"><strong>Thread2</strong> — тоже A→B</p>
+          <pre style="margin-top:0"><code class="language-tla">process Thread2 = 2
+begin
+  LockA2:
+    await ~mutexA;
+    mutexA := TRUE;
+  LockB2:
+    await ~mutexB;
+    mutexB := TRUE;
+  Critical2:
+    mutexA := FALSE;
+    mutexB := FALSE;
+end process;</code></pre>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.65em;margin-top:0.5em">
+        <span class="hl-teal">Результат:</span> TLC проверяет все 12 состояний — deadlock не найден. Invariant <code>Termination</code> выполняется.
+      </p>
+    </section>
+
+    <!-- 14: Development Pipeline -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Новый подход к разработке с <span class="hl-coral">LLM</span></h2>
+      <p class="slide-title subtitle">Где формальная верификация вписывается в современный цикл разработки</p>
+      <div class="pipeline">
+        <div class="pipeline-step purple"><span class="step-icon">📝</span><span class="step-title">Planning<br><span style="font-size:0.75em">Спецификация</span></span></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step coral"><span class="step-icon">🔍</span><span class="step-title">Spec<br><span style="font-size:0.75em">TLA+/PlusCal</span></span></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step yellow"><span class="step-icon">🔨</span><span class="step-title">Build<br><span style="font-size:0.75em">Реализация</span></span></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step teal"><span class="step-icon">✅</span><span class="step-title">Quality Gate<br><span style="font-size:0.75em">Model Check</span></span></div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step blue"><span class="step-icon">🚀</span><span class="step-title">Deploy<br><span style="font-size:0.75em">В прод</span></span></div>
+      </div>
+      <div class="points cols-2" style="margin-top:0.8em">
+        <div class="point purple">
+          <div class="num">01</div>
+          <h3>Почему Spec перед Build</h3>
+          <p>Находим ошибки в логике до написания кода. Исправить спецификацию — 5 минут. Исправить баг в проде — часы простоя и репутационные потери.</p>
+        </div>
+        <div class="point teal">
+          <div class="num">02</div>
+          <h3>Quality Gate как барьер</h3>
+          <p>Model Checker запускается в CI/CD. Если invariant нарушен — билд не проходит. Так же как unit-тесты, но проверяют <strong>все</strong> состояния.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15: TLA+ in Quality Gate -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">TLA+/Pluscal в <span class="hl-coral">Quality Gate</span> — ловим баги до выкатки</h2>
+      <div style="margin-top: 0.6em; font-size: 0.5em;">
+        <p style="font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4em;"><a href="https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf" style="color: var(--accent-teal);">Use of Formal Methods at Amazon Web Services</a></p>
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0 3px;">
+          <thead>
+            <tr style="color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85em;">
+              <th style="text-align: left; padding: 0.3em 0.5em; border-bottom: 1px solid var(--line); width: 80px;">System</th>
+              <th style="text-align: left; padding: 0.3em 0.5em; border-bottom: 1px solid var(--line);">Component</th>
+              <th style="text-align: center; padding: 0.3em 0.5em; border-bottom: 1px solid var(--line); width: 50px;">Lines</th>
+              <th style="text-align: center; padding: 0.3em 0.5em; border-bottom: 1px solid var(--line); width: 60px;">Lang</th>
+              <th style="text-align: left; padding: 0.3em 0.5em; border-bottom: 1px solid var(--line);">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: rgba(255,255,255,0.02);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">S3</td>
+              <td style="padding: 0.4em 0.5em;">Fault-tolerant low-level network algorithm</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">804</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-teal);">PlusCal</td>
+              <td style="padding: 0.4em 0.5em;">Found 2 bugs, further bugs in optimizations</td>
+            </tr>
+            <tr style="background: rgba(255,255,255,0.04);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">S3</td>
+              <td style="padding: 0.4em 0.5em;">Background redistribution of data</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">645</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-teal);">PlusCal</td>
+              <td style="padding: 0.4em 0.5em;">Found 1 bug + bug in first proposed fix</td>
+            </tr>
+            <tr style="background: rgba(255,255,255,0.02);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">DynamoDB</td>
+              <td style="padding: 0.4em 0.5em;">Replication & group-membership system</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">939</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-coral);">TLA+</td>
+              <td style="padding: 0.4em 0.5em;">Found 3 bugs, traces of 35 steps</td>
+            </tr>
+            <tr style="background: rgba(255,255,255,0.04);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">EBS</td>
+              <td style="padding: 0.4em 0.5em;">Volume management</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">102</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-teal);">PlusCal</td>
+              <td style="padding: 0.4em 0.5em;">Found 3 bugs</td>
+            </tr>
+            <tr style="background: rgba(255,255,255,0.02);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">Lock Mgr</td>
+              <td style="padding: 0.4em 0.5em;">Lock-free data structure</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">223</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-teal);">PlusCal</td>
+              <td style="padding: 0.4em 0.5em;">Improved confidence, missed liveness bug</td>
+            </tr>
+            <tr style="background: rgba(255,255,255,0.04);">
+              <td style="padding: 0.4em 0.5em; font-weight: 700; color: var(--text);">Lock Mgr</td>
+              <td style="padding: 0.4em 0.5em;">Fault tolerant replication & reconfiguration</td>
+              <td style="padding: 0.4em 0.5em; text-align: center;">318</td>
+              <td style="padding: 0.4em 0.5em; text-align: center; color: var(--accent-coral);">TLA+</td>
+              <td style="padding: 0.4em 0.5em;">Found 1 bug, verified aggressive optimization</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="points cols-2" style="margin-top:1em">
+        <div class="point coral">
+          <div class="num">❌</div>
+          <h3>Без TLA+</h3>
+          <p>Баги находят в проде → инциденты → hotfix → LSR → action items. Цикл: дни-недели. И не все баги воспроизводимы.</p>
+        </div>
+        <div class="point teal">
+          <div class="num">✓</div>
+          <h3>С TLA+ в Quality Gate</h3>
+          <p>Баги находят на этапе спецификации → исправляем за минуты → код пишем уже с проверенной логикой. Гарантия: <strong>все</strong> состояния проверены.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 16: Industry Adoption Timeline Infographic -->
+    <section style="padding-top: 100px">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Формальная верификация: <span class="hl-coral">тренды и применение</span></h2>
+      <p class="slide-title subtitle">Эволюция от академических исследований к production necessity в Big Tech</p>
+
+      <div class="timeline">
+        <div class="tl-step purple">
+          <span class="tl-dot"></span>
+          <div class="tl-when">2011–2014</div>
+          <div class="tl-title">TLA+ в AWS</div>
+          <ul>
+            <li>DynamoDB replication protocol</li>
+            <li>14 сервисов, найдены race conditions</li>
+            <li>Публикация CACM 2014</li>
+          </ul>
+        </div>
+        <div class="tl-step teal">
+          <span class="tl-dot"></span>
+          <div class="tl-when">2015–2019</div>
+          <div class="tl-title">DST и P Language</div>
+          <ul>
+            <li>FoundationDB: deterministic simulation</li>
+            <li>AWS P: state-машины для микросервисов</li>
+            <li>MongoDB: TLA+ для транзакций</li>
+          </ul>
+        </div>
+        <div class="tl-step coral">
+          <span class="tl-dot"></span>
+          <div class="tl-when">2021–2024</div>
+          <div class="tl-title">Масштабная верификация</div>
+          <ul>
+            <li>Cedar: 1B RPS, Dafny + differential testing</li>
+            <li>Kani: Rust verification (Firecracker, Lambda)</li>
+            <li>FizzBee, Quint: упрощение входа</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8em; margin-top: 1.2em; font-size: 0.6em;">
+        <div style="background: rgba(106,91,255,0.08); border: 1px solid var(--accent-purple); border-radius: 8px; padding: 0.7em;">
+          <div style="font-weight: 700; color: var(--accent-purple); margin-bottom: 0.3em;">🔍 Model Checking</div>
+          <div style="color: var(--muted); line-height: 1.4;">TLA+, P, FizzBee<br>Проверка протоколов и консенсуса</div>
+        </div>
+        <div style="background: rgba(255,102,51,0.08); border: 1px solid var(--accent-coral); border-radius: 8px; padding: 0.7em;">
+          <div style="font-weight: 700; color: var(--accent-coral); margin-bottom: 0.3em;">🔐 Program Verification</div>
+          <div style="color: var(--muted); line-height: 1.4;">Dafny, Kani, F*<br>Security-critical код и авторизация</div>
+        </div>
+        <div style="background: rgba(22,199,188,0.08); border: 1px solid var(--accent-teal); border-radius: 8px; padding: 0.7em;">
+          <div style="font-weight: 700; color: var(--accent-teal); margin-bottom: 0.3em;">🧪 Simulation</div>
+          <div style="color: var(--muted); line-height: 1.4;">DST, Antithesis<br>Fault injection, end-to-end testing</div>
+        </div>
+        <div style="background: rgba(44,122,255,0.08); border: 1px solid var(--accent-blue); border-radius: 8px; padding: 0.7em;">
+          <div style="font-weight: 700; color: var(--accent-blue); margin-bottom: 0.3em;">📐 Proof Assistants</div>
+          <div style="color: var(--muted); line-height: 1.4;">Coq/Iris, Isabelle/HOL<br>Математические доказательства</div>
+        </div>
+      </div>
+
+      <p class="muted" style="font-size:0.6em;margin-top:1em;line-height:1.5">
+        <strong>AWS</strong> — самый широкий портфель: TLA+ для дизайна, Dafny для security, Kani для Rust, DST для интеграции.
+        <strong>Microsoft</strong> — Dafny, F* (Project Everest), Azure Cosmos DB TLA+. <strong>MongoDB</strong> — модульная TLA+ спецификация distributed transactions.
+      </p>
+    </section>
+
+    <!-- 17: Will Willson / Antithesis -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Will Willson — <span class="hl-coral">Antithesis</span> и будущее верификации</h2>
+      <p class="slide-title subtitle">Автоматический поиск багов в распределённых системах</p>
+      <div class="example-box">
+        <div class="example-input">
+          <p class="example-label yellow">Что такое Antithesis</p>
+          <p><strong>Платформа:</strong> Запускает вашу систему в симулированном окружении и ищет баги автоматически.</p>
+          <p><strong>Ключевая идея:</strong> Не нужно писать спецификацию — система сама исследует пространство состояний.</p>
+          <p><strong>Доклад:</strong> Will Willson рассказывает, как Antithesis нашла баги в MongoDB, CockroachDB и других системах.</p>
+        </div>
+        <div class="example-arrow">→</div>
+        <div class="example-output">
+          <p class="example-label">Ссылки</p>
+          <ul>
+            <li><strong>YouTube:</strong> <a href="https://www.youtube.com/watch?v=PLACEHOLDER">Will Willson — Finding Bugs without Writing Tests</a></li>
+            <li><strong>Antithesis:</strong> <a href="https://antithesis.com">antithesis.com</a></li>
+            <li><strong>Примеры:</strong> Найдены баги в консенсусе, репликации, транзакциях</li>
+          </ul>
+          <p class="example-quote">"Мы нашли баги, которые существовали годами, за несколько часов работы Antithesis."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 18: Karpathy Autoresearch -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Karpathy Autoresearch — <span class="hl-coral">автоматизация</span> верификации</h2>
+      <p class="slide-title subtitle">Перспективы: LLM пишет спецификацию, Model Checker верифицирует</p>
+      <div class="points cols-3">
+        <div class="point purple">
+          <div class="num">01</div>
+          <h3>LLM → Spec</h3>
+          <p>Большие модели уже умеют переводить текстовое описание алгоритма в TLA+/PlusCal. Скоро это станет стандартом.</p>
+        </div>
+        <div class="point coral">
+          <div class="num">02</div>
+          <h3>Autoresearch</h3>
+          <p>Идея Karpathy: LLM генерирует гипотезы, проверяет их автоматически, находит новые свойства системы без участия человека.</p>
+        </div>
+        <div class="point teal">
+          <div class="num">03</div>
+          <h3>Покрытие критики</h3>
+          <p>Формальной верификацией можно покрыть критически важный код: консенсус, distributed locks, state machines. Не весь код — но важный.</p>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.72em;margin-top:1em">
+        <strong>Вывод:</strong> Верификация не заменит тесты, но станет обязательным шагом для критических компонентов — как типизация для Python.
+      </p>
+    </section>
+
+    <!-- 19: Thank you -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <div class="kicker">Вопросы?</div>
+      <h2>Спасибо за внимание!</h2>
+      <div style="margin-top:2em;font-size:0.75em">
+        <p style="font-size:1.1em;margin-bottom:0.8em"><strong>📚 Материалы:</strong></p>
+        <ul style="list-style:none;margin:0;padding:0;line-height:1.8">
+          <li>🔗 <a href="https://github.com/tlaplus/Examples">Примеры TLA+</a> — коллекция спецификаций</li>
+          <li>📺 <a href="https://youtu.be/WwZ2ulDpPzg?t=1729">Роман Липовский — алгоритм чекера TLA+</a> — Лекториум ФПМИ, 2021</li>
+          <li>📺 <a href="https://www.youtube.com/watch?v=PLACEHOLDER">Will Willson — Antithesis</a> — доклад</li>
+          <li>🌐 <a href="https://antithesis.com">antithesis.com</a> — платформа автономной AI верификации</li>
+          <li>💻 Код: <code>Deadlock.tla</code>, <code>NoDeadlock.tla</code></li>
+          <li>📄 Презентация: <code>index.html</code></li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  showSlideNumber: 'all',
+  center: false,
+  transition: 'slide',
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  plugins: [ RevealNotes ]
+});
+
+hljs.highlightAll();
+</script>
+
+</body>
+</html>
