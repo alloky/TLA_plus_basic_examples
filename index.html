@@ -492,6 +492,13 @@ html, body { background: var(--bg); }
       </div>
     </section>
 
+    <!-- 2.5: Poll - Deadlock experience -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 style="font-size: 2.4em; line-height: 1.2; text-align: center; max-width: 95%;">Сталкивались ли с дедлоками<br>в работе?</h2>
+      <p style="font-size: 1.3em; font-weight: 700; color: var(--accent-teal); text-align: center; margin-top: 1em;">Поставьте + / − в чат</p>
+    </section>
+
     <!-- 3: Intrigue - Question -->
     <section class="divider">
       <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
@@ -517,6 +524,70 @@ html, body { background: var(--bg); }
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px">
         <img src="./images/unreliable_agents.jpg" alt="Мем про ненадёжных агентов и race conditions" style="max-width:70%;max-height:500px;border-radius:12px;">
       </div>
+    </section>
+
+    <!-- 5.5: AI Harness -->
+    <section style="padding-top: 100px;">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">AI Harness и контроль качества кода</h2>
+      <p class="slide-title subtitle">Почему текущие инструменты недостаточны для проверки сложной логики</p>
+
+      <div class="points cols-3" style="margin-top: 1em;">
+        <div class="point coral">
+          <div class="num">01</div>
+          <h3>Ручное ревью кода</h3>
+          <ul style="margin: 0; padding-left: 1em; list-style: none; color: var(--muted); font-size: 0.85em;">
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-coral);">•</span>Требует огромного контекста</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-coral);">•</span>Сложно «перебрать все варианты» в голове</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-coral);">•</span>Легко упустить мелкую деталь</li>
+          </ul>
+        </div>
+        <div class="point purple">
+          <div class="num">02</div>
+          <h3>Автотесты</h3>
+          <ul style="margin: 0; padding-left: 1em; list-style: none; color: var(--muted); font-size: 0.85em;">
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-purple);">•</span>LLM галлюцинируют при генерации тестов</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-purple);">•</span>Ревью тестов — те же проблемы, что и с кодом</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-purple);">•</span>Не 100% гарантия — лишь часть сценариев</li>
+          </ul>
+        </div>
+        <div class="point teal">
+          <div class="num">03</div>
+          <h3>Линтеры и статический анализ</h3>
+          <ul style="margin: 0; padding-left: 1em; list-style: none; color: var(--muted); font-size: 0.85em;">
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-teal);">•</span>Zero-cost, стандарт в индустрии</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-teal);">•</span>Не подходят для многопоточного кода</li>
+            <li style="margin: 0.5em 0; position: relative; padding-left: 0.8em;"><span style="position: absolute; left: 0; color: var(--accent-teal);">•</span>Не находят race conditions и deadlock'и</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="muted" style="font-size:0.72em;margin-top:1.2em">
+        <strong>Вывод:</strong> Хочется найти инструмент, который <span class="hl-coral">алгоритмически гарантирует</span> отсутствие ошибок в коде.
+      </p>
+    </section>
+
+    <!-- 5.6: Agenda -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">План доклада</h2>
+      <div class="toc">
+        <div class="toc-row"><span class="toc-num" style="color:var(--accent-purple)">01</span><span class="toc-text">Что такое TLA+ и зачем он нужен</span></div>
+        <div class="toc-row"><span class="toc-num" style="color:var(--accent-coral)">02</span><span class="toc-text">Как работает Model Checker</span></div>
+        <div class="toc-row"><span class="toc-num" style="color:var(--accent-teal)">03</span><span class="toc-text">Live Demo — deadlock и его исправление</span></div>
+        <div class="toc-row"><span class="toc-num" style="color:var(--accent-blue)">04</span><span class="toc-text">Применение в индустрии и Quality Gate</span></div>
+        <div class="toc-row"><span class="toc-num" style="color:var(--accent-purple)">05</span><span class="toc-text">Будущее: AI Harness и автоматизация</span></div>
+      </div>
+      <p class="muted" style="font-size:0.72em;margin-top:1.5em">
+        <span class="hl-teal">💡 Репозиторий:</span> <a href="https://github.com/alloky/TLA_plus_basic_examples">github.com/alloky/TLA_plus_basic_examples</a> — можно самостоятельно запустить примеры в GoLand с плагином TLA+.
+      </p>
+    </section>
+
+    <!-- 5.7: Poll - Leslie Lamport -->
+    <section class="divider" style="padding-top: 250px;">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 style="font-size: 2.4em; line-height: 1.2; text-align: center; max-width: 95%;">Кто такой Лэсли Лэмпорт?</h2>
+      <p style="font-size: 1.3em; font-weight: 700; color: var(--accent-teal); text-align: center; margin-top: 1em;">Плюс в чат, кто знает!</p>
     </section>
 
     <!-- 6: Leslie Lamport -->
@@ -575,6 +646,16 @@ html, body { background: var(--bg); }
       <blockquote style="margin: 1em 0 0 0; padding: 0.8em 1em; border-left: 3px solid var(--accent-coral); background: rgba(255,102,51,0.05); font-size: 0.72em; font-style: italic; color: var(--muted); line-height: 1.5;">
         <strong style="color: var(--text); font-style: normal;">ACM Turing Award 2013:</strong> fundamental contributions to the theory and practice of distributed and concurrent systems, notably the invention of concepts such as causality and logical clocks, safety and liveness, <span class="hl-coral" style="text-decoration: underline;">replicated state machines</span>, and <span class="hl-coral" style="text-decoration: underline;">sequential consistency</span>.
       </blockquote>
+    </section>
+
+    <!-- 6.5: Formal Verifiers Definition -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <div class="kicker">Определение</div>
+      <h2 style="font-size: 2em; line-height: 1.2; max-width: 95%;">Формальные верификаторы — инструменты,<br>которые <span class="hl-coral">математически доказывают</span><br>корректность программы</h2>
+      <p style="font-size: 0.9em; color: var(--muted); margin-top: 1.2em; line-height: 1.5; max-width: 90%;">
+        В отличие от тестов, которые проверяют <strong>некоторые</strong> сценарии, верификаторы анализируют <strong>все возможные</strong> состояния системы и гарантируют отсутствие багов в спецификации.
+      </p>
     </section>
 
     <!-- 7: Formal Verifiers -->
@@ -644,6 +725,53 @@ html, body { background: var(--bg); }
       <p class="muted" style="font-size:0.72em;margin-top:1em">
         <strong>Пример:</strong> Два мьютекса <code>A</code> и <code>B</code>, два потока. Thread1 берёт A→B, Thread2 берёт B→A. Классический deadlock философов — но с двумя мьютексами.
       </p>
+    </section>
+
+    <!-- 8.5: State Graph -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Граф состояний программы — <span class="hl-coral">визуализация</span></h2>
+      <p class="slide-title subtitle">Все возможные пути выполнения двух потоков с двумя мьютексами</p>
+      <div style="margin-top: 1em; text-align: center;">
+        <svg width="720" height="260" viewBox="0 0 720 260" style="max-width: 100%;">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,255,255,0.6)"/>
+            </marker>
+          </defs>
+          <circle cx="70" cy="130" r="32" fill="none" stroke="#6A5BFF" stroke-width="2"/>
+          <text x="70" y="135" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Inter">S₀</text>
+          <text x="70" y="178" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Inter">A=0, B=0</text>
+          <circle cx="220" cy="70" r="32" fill="none" stroke="#FF6633" stroke-width="2"/>
+          <text x="220" y="75" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Inter">S₁</text>
+          <text x="220" y="113" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Inter">T1: A=1</text>
+          <circle cx="220" cy="190" r="32" fill="none" stroke="#FF6633" stroke-width="2"/>
+          <text x="220" y="195" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Inter">S₂</text>
+          <text x="220" y="233" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Inter">T2: B=1</text>
+          <circle cx="400" cy="130" r="38" fill="rgba(229,64,59,0.12)" stroke="#E5403B" stroke-width="3"/>
+          <text x="400" y="135" text-anchor="middle" fill="#E5403B" font-size="14" font-weight="800" font-family="Inter">S₃</text>
+          <text x="400" y="180" text-anchor="middle" fill="#E5403B" font-size="10" font-weight="700" font-family="Inter">DEADLOCK</text>
+          <circle cx="570" cy="70" r="32" fill="none" stroke="#16C7BC" stroke-width="2"/>
+          <text x="570" y="75" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Inter">S₄</text>
+          <text x="570" y="113" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Inter">T1: done</text>
+          <circle cx="570" cy="190" r="32" fill="none" stroke="#16C7BC" stroke-width="2"/>
+          <text x="570" y="195" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Inter">S₅</text>
+          <text x="570" y="233" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="Inter">T2: done</text>
+          <path d="M 102 115 Q 160 85 188 72" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <text x="145" y="78" fill="#FF6633" font-size="9" font-family="Inter">Next[T1]</text>
+          <path d="M 102 145 Q 160 175 188 188" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <text x="145" y="185" fill="#FF6633" font-size="9" font-family="Inter">Next[T2]</text>
+          <path d="M 252 70 Q 360 70 538 70" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <text x="395" y="62" fill="#16C7BC" font-size="9" font-family="Inter">Next[T1]</text>
+          <path d="M 250 90 Q 320 110 362 118" fill="none" stroke="#E5403B" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrowhead)"/>
+          <text x="305" y="102" fill="#E5403B" font-size="9" font-family="Inter">Next[T2]</text>
+          <path d="M 252 190 Q 360 190 538 190" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <text x="395" y="208" fill="#16C7BC" font-size="9" font-family="Inter">Next[T2]</text>
+          <path d="M 250 170 Q 320 150 362 142" fill="none" stroke="#E5403B" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrowhead)"/>
+          <text x="305" y="160" fill="#E5403B" font-size="9" font-family="Inter">Next[T1]</text>
+        </svg>
+        <p style="font-size: 0.6em; color: var(--muted); margin-top: 0.3em;">Граф состояний программы с двумя потоками и двумя мьютексами. Красные пунктирные рёбра — пути к deadlock'у.</p>
+      </div>
     </section>
 
     <!-- 9: Roman Lipovsky Lecture -->
@@ -818,6 +946,29 @@ end process;</code></pre>
           <p>Model Checker запускается в CI/CD. Если invariant нарушен — билд не проходит. Так же как unit-тесты, но проверяют <strong>все</strong> состояния.</p>
         </div>
       </div>
+    </section>
+
+    <!-- 14.5: TLA+ vs Race Detector -->
+    <section>
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 class="slide-title">Реальная применимость <span class="hl-coral">TLA+</span> в сравнении с инструментами</h2>
+      <ul style="margin-top: 1em; padding-left: 1.2em; list-style: none; font-size: 0.9em; line-height: 1.6;">
+        <li style="margin: 0.6em 0; position: relative; padding-left: 1em;">
+          <span style="position: absolute; left: 0; color: var(--accent-yellow);">•</span>
+          <strong style="color: var(--accent-yellow);">Race Detector (Go, TSAN):</strong> 
+          <span style="color: var(--muted);">Проверяет, что в</span> <strong>текущих запусках</strong> <span style="color: var(--muted);">не было гонок. Если тест не покрыл конкретный interleaving — баг останется незамеченным.</span>
+        </li>
+        <li style="margin: 0.6em 0; position: relative; padding-left: 1em;">
+          <span style="position: absolute; left: 0; color: var(--accent-coral);">•</span>
+          <strong style="color: var(--accent-coral);">TLA+ / Model Checker:</strong> 
+          <span style="color: var(--muted);">Проверяет, что во</span> <strong>всех возможных запусках</strong> <span style="color: var(--muted);">не будет гонок. Перебирает всё пространство состояний и гарантирует: если спецификация верна, багов нет.</span>
+        </li>
+        <li style="margin: 0.6em 0; position: relative; padding-left: 1em;">
+          <span style="position: absolute; left: 0; color: var(--accent-teal);">•</span>
+          <strong style="color: var(--accent-teal);">Аналогия:</strong> 
+          <span style="color: var(--muted);">Race detector на стресс-тестах — как уронить телефон с 1 метра 100 раз и не увидеть на экране ни одной царапины. TLA+ — как вывести формулу прочности стекла телефона и предсказать, что с такой высоты он не поцарапается ни при одном падении.</span>
+        </li>
+      </ul>
     </section>
 
     <!-- 15: TLA+ in Quality Gate -->
@@ -1010,6 +1161,12 @@ end process;</code></pre>
       <p class="muted" style="font-size:0.72em;margin-top:1em">
         <strong>Вывод:</strong> Верификация не заменит тесты, но станет обязательным шагом для критических компонентов — как типизация для Python.
       </p>
+    </section>
+
+    <!-- 18.5: Paxos Verification -->
+    <section class="divider">
+      <div class="hd"><div class="brand"><img class="brand-logo" src="./images/avito-logo.png" alt="avito.tech"></div></div>
+      <h2 style="font-size: 2.2em; line-height: 1.2; text-align: center; max-width: 95%;">А теперь давайте посмотрим<br>на результат верификации<br>спецификации <span class="hl-coral">Paxos</span></h2>
     </section>
 
     <!-- 19: Thank you -->
